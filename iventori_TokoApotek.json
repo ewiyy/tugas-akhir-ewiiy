@@ -1,0 +1,118 @@
+import json
+import time
+
+# o = obat
+data_obat = []  # list untuk menyimpan data obat
+
+# Fungsi menyimpan data ke file
+def simpan_data():
+    with open("inventori_apotek.json", "w") as f:
+        json.dump(data_obat, f, indent=4)
+
+# Fungsi memuat data dari file
+def muat_data():
+    try:
+        with open("inventori_apotek.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+# Fungsi mencari obat berdasarkan kode
+def cari_obat(kode):
+    for o in data_obat:
+        if o['kode'] == kode:
+            return o
+    return None
+
+# Fungsi tambah obat
+def tambah_obat():
+    kode = input("Kode obat: ")
+    if cari_obat(kode):
+        print("Obat dengan kode ini sudah ada.\n")
+        return
+    nama = input("Nama obat: ")
+    try:
+        stok = int(input("Jumlah stok: "))
+        data_obat.append({"kode": kode, "nama": nama, "stok": stok})
+        print("Obat berhasil ditambahkan.\n")
+    except ValueError:
+        print("Stok harus berupa angka.\n")
+
+# Fungsi melihat semua obat
+def lihat_semua():
+    if not data_obat:
+        print("Belum ada data obat.\n")
+        return
+    start = time.time()
+    for o in data_obat:
+        print(f"{o['kode']} - {o['nama']} (Stok: {o['stok']})")
+    end = time.time()
+    print(f"Waktu tampilkan data: {end - start:.6f} detik\n")
+
+# Fungsi mengedit stok
+def edit_stok():
+    kode = input("Masukkan kode obat yang ingin diedit: ")
+    o = cari_obat(kode)
+    if o:
+        try:
+            o['stok'] = int(input("Stok baru: "))
+            print("Stok obat diperbarui.\n")
+        except ValueError:
+            print("Stok harus berupa angka.\n")
+    else:
+        print("Obat tidak ditemukan.\n")
+
+# Fungsi menghapus obat
+def hapus_obat():
+    kode = input("Masukkan kode obat yang ingin dihapus: ")
+    o = cari_obat(kode)
+    if o:
+        data_obat.remove(o)
+        print("Obat berhasil dihapus.\n")
+    else:
+        print("Obat tidak ditemukan.\n")
+
+# Fungsi laporan stok
+def laporan_stok():
+    if not data_obat:
+        print("Belum ada data obat.\n")
+        return
+    print("Laporan stok obat (diurutkan dari jumlah terbanyak):")
+    start = time.time()
+    urut = sorted(data_obat, key=lambda x: x['stok'], reverse=True)
+    for o in urut:
+        print(f"{o['nama']} - Stok: {o['stok']}")
+    end = time.time()
+    print(f"Waktu proses laporan: {end - start:.6f} detik\n")
+
+# ===== Program Utama =====
+data_obat = muat_data()
+
+while True:
+    print("=== Menu Inventori Toko Apotek ===")
+    print("1. Tambah Obat")
+    print("2. Lihat Semua Obat")
+    print("3. Edit Stok Obat")
+    print("4. Hapus Obat")
+    print("5. Laporan Stok")
+    print("6. Simpan & Keluar")
+
+    pilihan = input("Pilih menu (1-6): ")
+    print()
+
+    if pilihan == '1':
+        tambah_obat()
+    elif pilihan == '2':
+        lihat_semua()
+    elif pilihan == '3':
+        edit_stok()
+    elif pilihan == '4':
+        hapus_obat()
+    elif pilihan == '5':
+        laporan_stok()
+    elif pilihan == '6':
+        simpan_data()
+        print("Data disimpan. Keluar dari program.")
+        break
+    else:
+        print("Pilihan tidak valid.\n")
